@@ -19,6 +19,7 @@ defmodule Day1.MixProject do
 
   defp deps do
     [
+      {:combination, "~> 0.0.3"}
     ]
   end
 end
