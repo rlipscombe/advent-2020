@@ -2,11 +2,7 @@ defmodule Day2ex do
   def main(_args) do
     input =
       File.read!("input")
-      |> String.split("\n")
-      |> Enum.filter(fn
-        "" -> false
-        _ -> true
-      end)
+      |> String.split("\n", trim: true)
       |> Enum.map(fn line ->
         [min, max, ch, password] =
           Regex.run(~r/^(\d+)-(\d+)\s(.):\s(.+)$/, line, capture: :all_but_first)
