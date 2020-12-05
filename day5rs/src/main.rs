@@ -3,8 +3,24 @@
 
 fn main() {
     let input = std::fs::read_to_string("input").expect("input file");
-    let seats: Vec<i32> = input.lines().map(parse).collect();
+    let mut seats: Vec<i32> = input.lines().map(parse).collect();
     println!("{}", seats.iter().max().unwrap());
+
+    // Sort the list and then look for a discontinuity.
+    seats.sort();
+    println!("{}", find_discontinuity(&seats));
+}
+
+fn find_discontinuity(values: &Vec<i32>) -> i32 {
+    let mut it = values.iter();
+    let mut curr = *it.next().unwrap();
+    loop {
+        let next = *it.next().unwrap();
+        if next != curr + 1 {
+            return curr + 1;
+        }
+        curr = next;
+    }
 }
 
 fn parse(s: &str) -> i32 {
