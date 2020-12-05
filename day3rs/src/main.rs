@@ -9,9 +9,16 @@ fn main() {
     let dy = 1;
 
     println!("{}", count_trees(&values, dx, dy));
+
+    let product: i64 = count_trees(&values, 1, 1)
+        * count_trees(&values, 3, 1)
+        * count_trees(&values, 5, 1)
+        * count_trees(&values, 7, 1)
+        * count_trees(&values, 1, 2);
+    println!("{}", product);
 }
 
-fn count_trees(values: &Vec<Vec<u8>>, dx: usize, dy: usize) -> i32 {
+fn count_trees(values: &Vec<Vec<u8>>, dx: usize, dy: usize) -> i64 {
     let mut trees = 0;
 
     let mut x = 0;
