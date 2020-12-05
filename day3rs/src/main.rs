@@ -5,6 +5,13 @@ fn main() {
         .map(|x| x.as_bytes().to_vec())
         .collect();
 
+    let dx = 3;
+    let dy = 1;
+
+    println!("{}", count_trees(&values, dx, dy));
+}
+
+fn count_trees(values: &Vec<Vec<u8>>, dx: usize, dy: usize) -> i32 {
     let mut trees = 0;
 
     let mut x = 0;
@@ -18,10 +25,10 @@ fn main() {
         if curr == 35 {
             trees += 1;
         }
-        x += 3;
+        x += dx;
         x %= values[y].len();
-        y += 1;
+        y += dy;
     }
 
-    println!("{}", trees);
+    trees
 }
