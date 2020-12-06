@@ -41,12 +41,10 @@ defmodule Day5ex do
 
   defp next_pairs(_enumerable, init), do: init
 
-  defp convert(s) do
-    s
-    |> String.replace("F", "0")
-    |> String.replace("B", "1")
-    |> String.replace("L", "0")
-    |> String.replace("R", "1")
-    |> String.to_integer(2)
-  end
+  defp convert(s), do: convert(s, 0)
+  defp convert("B" <> rest, acc), do: convert(rest, acc * 2 + 1)
+  defp convert("F" <> rest, acc), do: convert(rest, acc * 2)
+  defp convert("R" <> rest, acc), do: convert(rest, acc * 2 + 1)
+  defp convert("L" <> rest, acc), do: convert(rest, acc * 2)
+  defp convert("", acc), do: acc
 end
