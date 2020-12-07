@@ -1,14 +1,10 @@
 defmodule Day7ex do
-  def main(_args) do
-    name = "input"
+  def main([name]) do
 
     rules =
       File.read!(name)
       |> String.split("\n", trim: true)
       |> Enum.map(&parse_rule/1)
-
-    # Write that to a .png, so we can inspect it.
-    #rules |> to_dot() |> dot_to_png(name)
 
     # Convert the rules to a digraph.
     g = Graph.new(type: :directed)
@@ -16,16 +12,38 @@ defmodule Day7ex do
     g =
       Enum.reduce(rules, g, fn {outer, inners}, g ->
         Enum.reduce(inners, g, fn {count, inner}, g ->
-          Graph.add_edge(g, outer, inner, weight: count)
+          Graph.add_edge(g, outer, inner, label: "#{count}", weight: count)
         end)
       end)
 
-    #Graph.to_dot(g) |> dot_to_png(name <> "g")
+    # Write that to a .png, so we can inspect it.
+    # Note: This is not useful with the full input.
+    #Graph.to_dot(g) |> dot_to_png(name)
 
-    # Then search for our bag colour. From there, how many roots are there?
-    options = Graph.reaching(g, ["shiny gold"])
+    # Then search for my bag. From there, how many roots are there?
+    my_bag = "shiny gold"
+    options = Graph.reaching(g, [my_bag])
 
-    length(options) - 1 |> IO.inspect
+    part1 = length(options) - 1
+    IO.puts("part 1: #{part1}")
+
+    contents = Graph.reachable(g, [my_bag])
+
+    subgraph = Graph.subgraph(g, contents)
+    Graph.to_dot(subgraph) |> dot_to_png(name <> "-sg")
+
+    part2 = count_bags(subgraph, my_bag) - 1
+    IO.puts("part 2: #{part2}")
+
+    # post = Graph.postorder(subgraph) |> IO.inspect
+    # Enum.reduce(post, %{}, fn node, acc ->
+    #   count = Graph.out_edges(subgraph, node) |> Enum.reduce(1, fn e = %Graph.Edge{weight: w}, c ->
+    #     IO.puts "#{node} -> #{inspect(e)}"
+    #     c + w
+    #   end)
+    #   acc = Map.put(acc, node, count)
+    #   acc
+    # end) |> IO.inspect
   end
 
   defp parse_rule(s) do
@@ -44,28 +62,15 @@ defmodule Day7ex do
     {String.to_integer(count), colour}
   end
 
-  defp to_dot(rules) do
-    assigns = [rules: rules]
-
-    dot =
-      EEx.eval_string(
-        """
-        digraph G {
-          <%= for {outer, inners} <- rules do %>
-            <%= for {_, inner} <- inners do %>
-              "<%= outer %>" -> "<%= inner %>";
-            <% end %>
-          <% end %>
-        }
-        """,
-        assigns
-      )
-
-    {:ok, dot}
-  end
-
   defp dot_to_png({:ok, dot}, name) do
     File.write!(name <> ".dot", dot)
     {_, 0} = System.cmd("dot", ["-Tpng", "-o", "#{name}.png", "#{name}.dot"])
+  end
+
+  defp count_bags(g, v) do
+    Graph.out_edges(g, v)
+    |> Enum.reduce(1, fn %Graph.Edge{ weight: w, v2: v2 }, acc ->
+      acc + (w * count_bags(g, v2))
+    end)
   end
 end
