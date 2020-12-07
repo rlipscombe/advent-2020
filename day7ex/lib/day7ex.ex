@@ -34,16 +34,6 @@ defmodule Day7ex do
 
     part2 = count_bags(subgraph, my_bag) - 1
     IO.puts("part 2: #{part2}")
-
-    # post = Graph.postorder(subgraph) |> IO.inspect
-    # Enum.reduce(post, %{}, fn node, acc ->
-    #   count = Graph.out_edges(subgraph, node) |> Enum.reduce(1, fn e = %Graph.Edge{weight: w}, c ->
-    #     IO.puts "#{node} -> #{inspect(e)}"
-    #     c + w
-    #   end)
-    #   acc = Map.put(acc, node, count)
-    #   acc
-    # end) |> IO.inspect
   end
 
   defp parse_rule(s) do
