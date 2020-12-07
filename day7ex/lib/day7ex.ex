@@ -1,6 +1,5 @@
 defmodule Day7ex do
   def main([name]) do
-
     rules =
       File.read!(name)
       |> String.split("\n", trim: true)
@@ -18,7 +17,7 @@ defmodule Day7ex do
 
     # Write that to a .png, so we can inspect it.
     # Note: This is not useful with the full input.
-    #Graph.to_dot(g) |> dot_to_png(name)
+    # Graph.to_dot(g) |> dot_to_png(name)
 
     # Then search for my bag. From there, how many roots are there?
     my_bag = "shiny gold"
@@ -59,8 +58,8 @@ defmodule Day7ex do
 
   defp count_bags(g, v) do
     Graph.out_edges(g, v)
-    |> Enum.reduce(1, fn %Graph.Edge{ weight: w, v2: v2 }, acc ->
-      acc + (w * count_bags(g, v2))
+    |> Enum.reduce(1, fn %Graph.Edge{weight: w, v2: v2}, acc ->
+      acc + w * count_bags(g, v2)
     end)
   end
 end
