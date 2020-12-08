@@ -3,15 +3,35 @@ enum Instruction {
     Nop(i32),
     Acc(i32),
     Jmp(i32),
+    Trap,
     End,
 }
 
 fn main() {
     let input = std::fs::read_to_string("input").expect("input file");
     let mut instrs: Vec<Instruction> = input.lines().map(parse).collect();
+    instrs.push(Instruction::End);
 
-    let acc = run(&mut instrs);
-    println!("part 1 = {}", acc);
+    let mut scratch = instrs.clone();
+    let acc = run(&mut scratch);
+    println!("part 1 = {:?}", acc.unwrap_err());
+
+    // Do it all again by mutating exactly *one* instruction.
+    for i in 0..instrs.len() {
+        let result = std::panic::catch_unwind(|| {
+            let mut mutated = instrs.clone();
+            mutate(&mut mutated, i);
+            run(&mut mutated)
+        });
+
+        match result {
+            Err(_) => { /* it panicked */ }
+            Ok(Err(_)) => { /* it looped */ }
+            Ok(Ok(result)) => {
+                println!("part 2 = {:?}", result);
+            }
+        }
+    }
 }
 
 fn parse(instr: &str) -> Instruction {
@@ -27,16 +47,21 @@ fn parse(instr: &str) -> Instruction {
     }
 }
 
-fn run(instrs: &mut Vec<Instruction>) -> i32 {
+fn run(instrs: &mut Vec<Instruction>) -> Result<i32, i32> {
     use Instruction::*;
 
     let mut acc: i32 = 0;
     let mut pc: usize = 0;
 
     loop {
+        if pc >= instrs.len() {
+            // Fell off the world.
+            return Err(acc);
+        }
+
         // Destructive fetch
         let curr = instrs[pc];
-        instrs[pc] = End;
+        instrs[pc] = Trap;
 
         match curr {
             Nop(_) => {
@@ -49,11 +74,10 @@ fn run(instrs: &mut Vec<Instruction>) -> i32 {
             Jmp(arg) => {
                 pc = jmp(pc, arg);
             }
-            End => break,
+            Trap => return Err(acc),
+            End => return Ok(acc)
         }
     }
-
-    acc
 }
 
 // per https://stackoverflow.com/a/54035801
@@ -62,5 +86,19 @@ fn jmp(pc: usize, off: i32) -> usize {
         pc - off.wrapping_abs() as u32 as usize
     } else {
         pc + off as usize
+    }
+}
+
+fn mutate(instrs: &mut Vec<Instruction>, pc: usize) {
+    use Instruction::*;
+
+    match instrs[pc] {
+        Nop(arg) => {
+            instrs[pc] = Jmp(arg);
+        }
+        Jmp(arg) => {
+            instrs[pc] = Nop(arg);
+        }
+        _ => {},
     }
 }
