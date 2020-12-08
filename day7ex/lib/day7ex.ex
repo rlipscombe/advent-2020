@@ -5,6 +5,8 @@ defmodule Day7ex do
       |> String.split("\n", trim: true)
       |> Enum.map(&parse_rule/1)
 
+    #{_adjectives, _colours} = extract_words(rules) |> IO.inspect()
+
     # Convert the rules to a digraph.
     g = Graph.new(type: :directed)
 
@@ -60,6 +62,20 @@ defmodule Day7ex do
     Graph.out_edges(g, v)
     |> Enum.reduce(1, fn %Graph.Edge{weight: w, v2: v2}, acc ->
       acc + w * count_bags(g, v2)
+    end)
+  end
+
+  defp extract_words(rules) do
+    bags =
+      Enum.reduce(rules, MapSet.new(), fn {outer, inners}, acc ->
+        Enum.reduce(inners, MapSet.put(acc, outer), fn {_, inner}, acc ->
+          MapSet.put(acc, inner)
+        end)
+      end)
+
+    Enum.reduce(bags, {MapSet.new(), MapSet.new()}, fn bag, {adjectives, colours} ->
+      [adjective, colour] = String.split(bag)
+      {MapSet.put(adjectives, adjective), MapSet.put(colours, colour)}
     end)
   end
 end
