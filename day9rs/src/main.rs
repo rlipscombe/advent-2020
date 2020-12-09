@@ -15,7 +15,10 @@ fn main() {
     //println!("{:?}", part2);
 
     // Want the smallest and largest number in that slice.
-    println!("part2 = {}", part2.iter().min().unwrap() + part2.iter().max().unwrap());
+    println!(
+        "part2 = {}",
+        part2.iter().min().unwrap() + part2.iter().max().unwrap()
+    );
 }
 
 fn part1(values: &[i64], look: usize) -> i64 {
@@ -43,8 +46,9 @@ fn part2(values: &[i64], target: i64) -> Option<&[i64]> {
     // or fallen off the end.
     // Alternatively, meh: just sum the range.
     // If we can't find it, advance one position and try again.
-    for pos0 in 0..values.len() {
-        for pos1 in (pos0 + 1)..values.len() {
+    for len in 2..values.len() {
+        for pos0 in 0..values.len() - len {
+            let pos1 = pos0 + len;
             let sum: i64 = values[pos0..=pos1].iter().sum();
             //println!("{:?} {}", &values[pos0..=pos1], sum);
             if sum == target {
@@ -52,6 +56,15 @@ fn part2(values: &[i64], target: i64) -> Option<&[i64]> {
             }
         }
     }
+    /*for pos0 in 0..values.len() {
+        for pos1 in (pos0 + 1)..values.len() {
+            let sum: i64 = values[pos0..=pos1].iter().sum();
+            //println!("{:?} {}", &values[pos0..=pos1], sum);
+            if sum == target {
+                return Some(&values[pos0..=pos1]);
+            }
+        }
+    }*/
 
     None
 }
