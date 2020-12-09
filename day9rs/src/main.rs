@@ -1,14 +1,21 @@
 use itertools::Itertools;
 
 fn main() {
-    let values: Vec<i64> = std::fs::read_to_string("input")
+    //let (path, look) = ("example", 5);
+    let (path, look) = ("input", 25);
+    let values: Vec<i64> = std::fs::read_to_string(path)
         .expect("input file")
         .lines()
         .map(|x| x.parse().expect("integer"))
         .collect();
-    let look = 25;
     let part1 = part1(&values, look);
-    println!("{}", part1);
+    println!("part1 = {}", part1);
+
+    let part2 = part2(&values, part1).unwrap();
+    //println!("{:?}", part2);
+
+    // Want the smallest and largest number in that slice.
+    println!("part2 = {}", part2.iter().min().unwrap() + part2.iter().max().unwrap());
 }
 
 fn part1(values: &[i64], look: usize) -> i64 {
@@ -28,4 +35,22 @@ fn part1(values: &[i64], look: usize) -> i64 {
 
         pos += 1;
     }
+}
+
+fn part2(values: &[i64], target: i64) -> Option<&[i64]> {
+    // Start at some position in the list of values. Add up the contiguous numbers
+    // from there until we've matched (yay!) or exceeded (sad face) the target number,
+    // or fallen off the end.
+    // If we can't find it, advance one position and try again.
+    for pos0 in 0..values.len() {
+        for pos1 in (pos0 + 1)..values.len() {
+            let sum: i64 = values[pos0..=pos1].iter().sum();
+            //println!("{:?} {}", &values[pos0..=pos1], sum);
+            if sum == target {
+                return Some(&values[pos0..=pos1]);
+            }
+        }
+    }
+
+    None
 }
