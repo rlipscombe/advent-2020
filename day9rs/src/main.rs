@@ -41,6 +41,7 @@ fn part2(values: &[i64], target: i64) -> Option<&[i64]> {
     // Start at some position in the list of values. Add up the contiguous numbers
     // from there until we've matched (yay!) or exceeded (sad face) the target number,
     // or fallen off the end.
+    // Alternatively, meh: just sum the range.
     // If we can't find it, advance one position and try again.
     for pos0 in 0..values.len() {
         for pos1 in (pos0 + 1)..values.len() {
