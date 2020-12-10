@@ -1,10 +1,17 @@
 defmodule Day10ex do
   def main([path]) do
-    values = File.read!(path) |> String.split() |> Enum.map(&String.to_integer/1)
+    values =
+      File.read!(path)
+      |> String.split()
+      |> Enum.map(&String.to_integer/1)
+      |> Enum.sort()
 
+    IO.puts("part 1 = #{part1(values)}")
+  end
+
+  defp part1(values) do
     {ones, threes} =
       values
-      |> Enum.sort()
       |> Enum.chunk_every(2, 1, :discard)
       |> Enum.reduce({1, 1}, fn [a, b], {ones, threes} ->
         case b - a do
@@ -13,7 +20,6 @@ defmodule Day10ex do
         end
       end)
 
-    product = ones * threes
-    IO.puts("part 1 = #{product}")
+    ones * threes
   end
 end
