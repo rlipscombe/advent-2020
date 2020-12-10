@@ -10,13 +10,17 @@ defmodule Day10ex.MixProject do
       escript: escript_options()
     ]
   end
-  
+
+  def application do
+    [extra_applications: [:ex_unit]]
+  end
+
   defp escript_options do
     [
       main_module: Day10ex
     ]
   end
-  
+
   defp deps do
     [
       # {:dep_from_hexpm, "~> 0.3.0"},
