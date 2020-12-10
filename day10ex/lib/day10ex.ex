@@ -37,22 +37,22 @@ defmodule Day10ex do
 
   defp part2(values), do: part2([0 | values], %{0 => 1})
 
-  defp part2([v], map), do: Map.get(map, v)
+  defp part2([last], map), do: Map.get(map, last)
 
-  defp part2([v | values], map) do
+  defp part2([here | rest], map) do
     # How many ways are there to get *to* here?
-    c = Map.get(map, v)
+    count = Map.get(map, here)
 
     # Where can we go *from* here?
-    vs = values |> Enum.filter(fn x -> x <= v + 3 end)
+    theres = rest |> Enum.filter(fn there -> there <= here + 3 end)
 
     # Add the number of ways to get *here* to the number of ways to get *there*.
     map =
-      Enum.reduce(vs, map, fn w, map ->
-        Map.update(map, w, c, fn x -> x + c end)
+      Enum.reduce(theres, map, fn there, map ->
+        Map.update(map, there, count, fn x -> x + count end)
       end)
 
     # Next.
-    part2(values, map)
+    part2(rest, map)
   end
 end
