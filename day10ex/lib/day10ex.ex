@@ -16,14 +16,9 @@ defmodule Day10ex do
     IO.puts("len #{len}, uniq_len #{uniq_len}, min #{min}, max #{max}")
     # Answer: no duplicates, 92 entries, min 1, max 138
 
-    # paths = part2(values, [0])
-    # IO.puts("part 2 = #{length(paths)}")
-
     # Forget actually working out the paths (because that takes a lot of memory).
     # Let's try something different: merely counting all the ways I can get to a particular node.
-    map = part2bis([0 | values], %{0 => 1})
-    part2 = Map.get(map, max)
-    IO.puts("part 2 = #{part2}")
+    IO.puts("part 2 = #{part2(values)}")
   end
 
   defp part1(values) do
@@ -40,36 +35,20 @@ defmodule Day10ex do
     ones * threes
   end
 
-  defp part2bis([], map), do: map
-  defp part2bis([v | values], map) do
+  defp part2(values), do: part2([0 | values], %{0 => 1})
+
+  defp part2([v], map), do: Map.get(map, v)
+
+  defp part2([v | values], map) do
     vs = values |> Enum.filter(fn x -> x <= v + 3 end)
-    #IO.puts("#{inspect(vs)}")
 
     c = Map.get(map, v)
-    #IO.puts("#{v} #{c}")
-    map = Enum.reduce(vs, map, fn w, map ->
-      #IO.puts("#{v}(#{c}) -> #{w}")
-      Map.update(map, w, c, fn x -> x + c end)
-    end)
 
-    part2bis(values, map)
-  end
+    map =
+      Enum.reduce(vs, map, fn w, map ->
+        Map.update(map, w, c, fn x -> x + c end)
+      end)
 
-  # Look at it backwards: At any point, I've got a breadcrumb trail of how I got
-  # here, plus a bunch of options for my next step.
-  defp part2(values, [p | _] = path) do
-    # Need to explore all of the possible paths from here. That is:
-    # for each valid next item in 'values', recurse.
-    options = values |> Enum.filter(fn x -> x > p && x <= p + 3 end)
-
-    case options do
-      [] ->
-        [path]
-
-      _ ->
-        Enum.flat_map(options, fn v ->
-          part2(values -- [v], [v | path])
-        end)
-    end
+    part2(values, map)
   end
 end
