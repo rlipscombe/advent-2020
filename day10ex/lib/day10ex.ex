@@ -40,15 +40,19 @@ defmodule Day10ex do
   defp part2([v], map), do: Map.get(map, v)
 
   defp part2([v | values], map) do
-    vs = values |> Enum.filter(fn x -> x <= v + 3 end)
-
+    # How many ways are there to get *to* here?
     c = Map.get(map, v)
 
+    # Where can we go *from* here?
+    vs = values |> Enum.filter(fn x -> x <= v + 3 end)
+
+    # Add the number of ways to get *here* to the number of ways to get *there*.
     map =
       Enum.reduce(vs, map, fn w, map ->
         Map.update(map, w, c, fn x -> x + c end)
       end)
 
+    # Next.
     part2(values, map)
   end
 end
