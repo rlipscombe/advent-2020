@@ -13,22 +13,17 @@ defmodule Day10ex do
     uniq_len = values |> Enum.uniq() |> length()
     min = values |> Enum.min()
     max = values |> Enum.max()
-    IO.puts("len #{len}, uniq_len #{uniq_len} min #{min} max #{max}")
+    IO.puts("len #{len}, uniq_len #{uniq_len}, min #{min}, max #{max}")
     # Answer: no duplicates, 92 entries, min 1, max 138
 
-    ExUnit.start()
-    tests()
+    # paths = part2(values, [0])
+    # IO.puts("part 2 = #{length(paths)}")
 
-    IO.puts("part 2 = #{part2(values)}")
-  end
-
-  defp tests() do
-    use ExUnit.Case
-    assert paths([]) == []
-    assert paths([1]) == [[1]]
-    assert paths([1, 2]) == [[1, 2], [2]]
-
-    assert paths([1, 2, 3, 4, 5]) == [[1, 2, 3, 4, 5], [1, 3, 4, 5], [1, 4, 5], [1, 4], [2, 3, 4, 5], [2, 4, 5], ...]
+    # Forget actually working out the paths (because that takes a lot of memory).
+    # Let's try something different: merely counting all the ways I can get to a particular node.
+    map = part2bis([0 | values], %{0 => 1})
+    part2 = Map.get(map, max)
+    IO.puts("part 2 = #{part2}")
   end
 
   defp part1(values) do
@@ -45,25 +40,36 @@ defmodule Day10ex do
     ones * threes
   end
 
-  defp part2(values) do
-    part2(0, values, [])
+  defp part2bis([], map), do: map
+  defp part2bis([v | values], map) do
+    vs = values |> Enum.filter(fn x -> x <= v + 3 end)
+    #IO.puts("#{inspect(vs)}")
+
+    c = Map.get(map, v)
+    #IO.puts("#{v} #{c}")
+    map = Enum.reduce(vs, map, fn w, map ->
+      #IO.puts("#{v}(#{c}) -> #{w}")
+      Map.update(map, w, c, fn x -> x + c end)
+    end)
+
+    part2bis(values, map)
   end
 
-  # Returns a list of path suffixes from where we are to the end.
-  defp part2(_, [], acc), do: acc
-  defp part2(jolts, values, acc) do
-    IO.inspect("(#{jolts}) #{inspect(values)} #{inspect(acc)}")
-    # At each step, take one of the valid options from the front of the list.
-    # We know that the list is sorted; we know that we've got a 3 jolt range; so
-    # we only need to examine a limited number of options.
-    prefix = Enum.take(values, 3) |> Enum.filter(fn x -> x > jolts && x <= jolts + 3 end)
+  # Look at it backwards: At any point, I've got a breadcrumb trail of how I got
+  # here, plus a bunch of options for my next step.
+  defp part2(values, [p | _] = path) do
+    # Need to explore all of the possible paths from here. That is:
+    # for each valid next item in 'values', recurse.
+    options = values |> Enum.filter(fn x -> x > p && x <= p + 3 end)
 
-    paths = for p <- prefix do
-      part2(p, values -- [p], acc ++ [p])
-    end |> IO.inspect
+    case options do
+      [] ->
+        [path]
 
-    for p <- paths do
-      acc ++ p
+      _ ->
+        Enum.flat_map(options, fn v ->
+          part2(values -- [v], [v | path])
+        end)
     end
   end
 end
