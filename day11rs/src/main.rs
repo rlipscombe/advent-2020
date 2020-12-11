@@ -1,22 +1,63 @@
+//use std::{thread, time};
+
+#[derive(Clone, Copy, PartialEq)]
 enum Cell {
     Floor,
     Empty,
     Occupied,
 }
 
-type Grid = Vec<Vec<Cell>>;
+#[derive(Clone)]
+struct Grid {
+    cells: Vec<Vec<Cell>>,
+    height: usize,
+    width: usize,
+}
+
+impl Grid {
+    fn new(cells: Vec<Vec<Cell>>) -> Self {
+        let height = cells.len();
+        let width = cells[0].len();
+        Self {
+            cells,
+            height,
+            width,
+        }
+    }
+}
+
+#[derive(PartialEq, Debug)]
+enum Dirty {
+    Unchanged,
+    Changed,
+}
 
 fn main() {
-    //let path = "input";
-    let path = "example";
-    let grid: Vec<Vec<Cell>> = std::fs::read_to_string(path)
+    let path = "input";
+    //let path = "example";
+    let cells: Vec<Vec<Cell>> = std::fs::read_to_string(path)
         .expect("input file")
         .lines()
         .map(parse_line)
         .collect();
+    let mut grid = Grid::new(cells);
 
-    // Does Rust have ncurses support, or am I just going to clear the screen each time?
-    render(grid);
+    grid.render();
+    let mut iters = 0;
+    loop {
+        //thread::sleep(time::Duration::from_millis(2000));
+        let (next, changed) = iterate(grid.clone());
+        iters += 1;
+        next.render();
+        println!("{} {:?}", iters, changed);
+        if changed == Dirty::Unchanged {
+            break;
+        }
+        grid = next;
+    }
+
+    let count = count_occupied(grid);
+    println!("{}", count);
 }
 
 fn parse_line(line: &str) -> Vec<Cell> {
@@ -25,25 +66,133 @@ fn parse_line(line: &str) -> Vec<Cell> {
             'L' => Cell::Empty,
             '.' => Cell::Floor,
             '#' => Cell::Occupied,
-            _ => panic!()
+            _ => panic!(),
         })
         .collect()
 }
 
-fn render(grid: Grid) {
-    print!("{}{}", termion::clear::All, termion::cursor::Goto(1, 1));
-    for r in grid {
-        for c in r {
-            render_cell(c);
+impl Grid {
+    fn render(&self) {
+        print!("{}{}", termion::clear::All, termion::cursor::Goto(1, 1));
+        for r in 0..self.height {
+            for c in 0..self.width {
+                let cell = self.cells[r][c];
+                render_cell(cell);
+            }
+            println!();
         }
-        println!();
     }
 }
 
 fn render_cell(cell: Cell) {
     match cell {
-        Cell::Empty => { print!("L"); }
-        Cell::Floor => { print!("."); }
-        Cell::Occupied => { print!("#"); }
+        Cell::Empty => {
+            print!("L");
+        }
+        Cell::Floor => {
+            print!(".");
+        }
+        Cell::Occupied => {
+            print!("#");
+        }
     }
+}
+
+fn iterate(grid: Grid) -> (Grid, Dirty) {
+    let mut result = grid.clone();
+    let mut dirty = Dirty::Unchanged;
+
+    // Then, for each cell in the automaton, apply the rule.
+    for r in 0..grid.height {
+        for c in 0..grid.width {
+            result.cells[r][c] = mutate(&grid.cells, r, c, grid.height, grid.width);
+            if result.cells[r][c] != grid.cells[r][c] {
+                dirty = Dirty::Changed;
+            }
+        }
+    }
+
+    (result, dirty)
+}
+
+fn count_occupied(grid: Grid) -> usize {
+    let mut count = 0;
+
+    for r in 0..grid.height {
+        for c in 0..grid.width {
+            if grid.cells[r][c] == Cell::Occupied {
+                count += 1;
+            }
+        }
+    }
+
+    count
+}
+
+fn mutate(cells: &Vec<Vec<Cell>>, r: usize, c: usize, height: usize, width: usize) -> Cell {
+    // Given (r,c), which other locations do we care about?
+    let adjacent = get_adjacent(r, c, height, width);
+    let occupied = count_occupied_adjacent(cells, adjacent);
+
+    let cell = cells[r][c];
+
+    // If a seat is empty, and there are no occupied seats adjacent, it becomes occupied.
+    // If a seat is occupied and four or more seats are occupied, it becomes empty.
+    if cell == Cell::Empty && occupied == 0 {
+        Cell::Occupied
+    } else if cell == Cell::Occupied && occupied >= 4 {
+        Cell::Empty
+    } else {
+        cell
+    }
+}
+
+fn count_occupied_adjacent(cells: &Vec<Vec<Cell>>, adjacent: Vec<(usize, usize)>) -> usize {
+    let mut result = 0;
+
+    for (r, c) in adjacent {
+        if cells[r][c] == Cell::Occupied {
+            result += 1;
+        }
+    }
+
+    result
+}
+
+fn get_adjacent(r: usize, c: usize, height: usize, width: usize) -> Vec<(usize, usize)> {
+    let mut result = Vec::new();
+
+    /*
+       (r-1,c-1) (r-1,c) (r-1,c+1)
+       (r,c-1)   (r,c)   (r,c+1)
+       (r+1,c-1) (r+1,c) (r+1,c+1)
+    */
+    if r > 0 && c > 0 {
+        result.push((r - 1, c - 1));
+    }
+    if r > 0 {
+        result.push((r - 1, c));
+    }
+    if r > 0 && c < width - 1 {
+        result.push((r - 1, c + 1));
+    }
+
+    if c > 0 {
+        result.push((r, c - 1));
+    }
+    if c < width - 1 {
+        result.push((r, c + 1));
+    }
+
+    if r < height - 1 && c > 0 {
+        result.push((r + 1, c - 1));
+    }
+    if r < height - 1 {
+        result.push((r + 1, c));
+    }
+    if r < height - 1 && c < width - 1 {
+        result.push((r + 1, c + 1));
+    }
+
+    result
 }
