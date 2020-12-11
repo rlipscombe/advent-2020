@@ -143,21 +143,7 @@ fn mutate(r: usize, c: usize, grid: &Grid) -> Cell {
 }
 
 fn count_occupied_adjacent(r: usize, c: usize, grid: &Grid) -> usize {
-    let adjacent = get_adjacent(r, c, grid.height, grid.width);
-
     let mut result = 0;
-
-    for (r, c) in adjacent {
-        if grid.cells[r][c] == Cell::Occupied {
-            result += 1;
-        }
-    }
-
-    result
-}
-
-fn get_adjacent(r: usize, c: usize, height: usize, width: usize) -> Vec<(usize, usize)> {
-    let mut result = Vec::new();
 
     /*
        (r-1,c-1) (r-1,c) (r-1,c+1)
@@ -165,30 +151,46 @@ fn get_adjacent(r: usize, c: usize, height: usize, width: usize) -> Vec<(usize, 
        (r+1,c-1) (r+1,c) (r+1,c+1)
     */
     if r > 0 && c > 0 {
-        result.push((r - 1, c - 1));
+        if grid.cells[r - 1][c - 1] == Cell::Occupied {
+            result += 1;
+        }
     }
     if r > 0 {
-        result.push((r - 1, c));
+        if grid.cells[r - 1][c] == Cell::Occupied {
+            result += 1;
+        }
     }
-    if r > 0 && c < width - 1 {
-        result.push((r - 1, c + 1));
+    if r > 0 && c < grid.width - 1 {
+        if grid.cells[r - 1][c + 1] == Cell::Occupied {
+            result += 1;
+        }
     }
 
     if c > 0 {
-        result.push((r, c - 1));
+        if grid.cells[r][c - 1] == Cell::Occupied {
+            result += 1;
+        }
     }
-    if c < width - 1 {
-        result.push((r, c + 1));
+    if c < grid.width - 1 {
+        if grid.cells[r][c + 1] == Cell::Occupied {
+            result += 1;
+        }
     }
 
-    if r < height - 1 && c > 0 {
-        result.push((r + 1, c - 1));
+    if r < grid.height - 1 && c > 0 {
+        if grid.cells[r + 1][c - 1] == Cell::Occupied {
+            result += 1;
+        }
     }
-    if r < height - 1 {
-        result.push((r + 1, c));
+    if r < grid.height - 1 {
+        if grid.cells[r + 1][c] == Cell::Occupied {
+            result += 1;
+        }
     }
-    if r < height - 1 && c < width - 1 {
-        result.push((r + 1, c + 1));
+    if r < grid.height - 1 && c < grid.width - 1 {
+        if grid.cells[r + 1][c + 1] == Cell::Occupied {
+            result += 1;
+        }
     }
 
     result
