@@ -127,15 +127,15 @@ fn count_occupied(grid: Grid) -> usize {
 }
 
 fn mutate(r: usize, c: usize, grid: &Grid) -> Cell {
-    let occupied = count_occupied_adjacent(r, c, grid);
-
+    //let occupied = count_occupied_adjacent(r, c, grid);
+    let occupied = count_occupied_visible(r, c, grid);
     let cell = grid.cells[r][c];
 
     // If a seat is empty, and there are no occupied seats adjacent, it becomes occupied.
     // If a seat is occupied and four or more seats are occupied, it becomes empty.
     if cell == Cell::Empty && occupied == 0 {
         Cell::Occupied
-    } else if cell == Cell::Occupied && occupied >= 4 {
+    } else if cell == Cell::Occupied && occupied >= 5 {
         Cell::Empty
     } else {
         cell
@@ -192,6 +192,95 @@ fn count_occupied_adjacent(r: usize, c: usize, grid: &Grid) -> usize {
             result += 1;
         }
     }
+
+    result
+}
+
+fn search_visible(grid: &Grid, r: usize, c: usize, dr: isize, dc: isize) -> usize {
+    let mut r = r as isize;
+    let mut c = c as isize;
+
+    loop {
+        r += dr;
+        c += dc;
+
+        if r >= 0 && c >= 0 && r < grid.height as isize && c < grid.width as isize {
+            let cell = grid.cells[r as usize][c as usize];
+            if cell == Cell::Occupied {
+                return 1;
+            } else if cell == Cell::Empty {
+                return 0;
+            }
+        }
+        else {
+            break;
+        }
+    }
+
+    0
+}
+
+fn count_occupied_visible(r: usize, c: usize, grid: &Grid) -> usize {
+    let mut result = 0;
+
+    // Search NW
+    result += search_visible(grid, r, c, -1, -1);
+    // Search N
+    result += search_visible(grid, r, c, -1, 0);
+    // Search NE
+    result += search_visible(grid, r, c, -1, 1);
+    // Search W
+    result += search_visible(grid, r, c, 0, -1);
+    // Search E
+    result += search_visible(grid, r, c, 0, 1);
+    // Search SW
+    result += search_visible(grid, r, c, 1, -1);
+    // Search S
+    result += search_visible(grid, r, c, 1, 0);
+    // Search SE
+    result += search_visible(grid, r, c, 1, 1);
+    // if r > 0 && c > 0 {
+    //     if grid.cells[r - 1][c - 1] == Cell::Occupied {
+    //         result += 1;
+    //     }
+    // }
+    // if r > 0 {
+    //     if grid.cells[r - 1][c] == Cell::Occupied {
+    //         result += 1;
+    //     }
+    // }
+    // if r > 0 && c < grid.width - 1 {
+    //     if grid.cells[r - 1][c + 1] == Cell::Occupied {
+    //         result += 1;
+    //     }
+    // }
+
+    // if c > 0 {
+    //     if grid.cells[r][c - 1] == Cell::Occupied {
+    //         result += 1;
+    //     }
+    // }
+    // if c < grid.width - 1 {
+    //     if grid.cells[r][c + 1] == Cell::Occupied {
+    //         result += 1;
+    //     }
+    // }
+
+    // if r < grid.height - 1 && c > 0 {
+    //     if grid.cells[r + 1][c - 1] == Cell::Occupied {
+    //         result += 1;
+    //     }
+    // }
+    // if r < grid.height - 1 {
+    //     if grid.cells[r + 1][c] == Cell::Occupied {
+    //         result += 1;
+    //     }
+    // }
+    // if r < grid.height - 1 && c < grid.width - 1 {
+    //     if grid.cells[r + 1][c + 1] == Cell::Occupied {
+    //         result += 1;
+    //     }
+    // }
 
     result
 }
