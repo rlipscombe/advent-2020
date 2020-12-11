@@ -43,13 +43,10 @@ fn main() {
     let mut grid = Grid::new(cells);
 
     grid.render();
-    let mut iters = 0;
     loop {
         //thread::sleep(time::Duration::from_millis(2000));
         let (next, changed) = iterate(grid.clone());
-        iters += 1;
         next.render();
-        println!("{} {:?}", iters, changed);
         if changed == Dirty::Unchanged {
             break;
         }
@@ -105,7 +102,7 @@ fn iterate(grid: Grid) -> (Grid, Dirty) {
     // Then, for each cell in the automaton, apply the rule.
     for r in 0..grid.height {
         for c in 0..grid.width {
-            result.cells[r][c] = mutate(&grid.cells, r, c, grid.height, grid.width);
+            result.cells[r][c] = mutate(r, c, &grid);
             if result.cells[r][c] != grid.cells[r][c] {
                 dirty = Dirty::Changed;
             }
@@ -129,12 +126,10 @@ fn count_occupied(grid: Grid) -> usize {
     count
 }
 
-fn mutate(cells: &Vec<Vec<Cell>>, r: usize, c: usize, height: usize, width: usize) -> Cell {
-    // Given (r,c), which other locations do we care about?
-    let adjacent = get_adjacent(r, c, height, width);
-    let occupied = count_occupied_adjacent(cells, adjacent);
+fn mutate(r: usize, c: usize, grid: &Grid) -> Cell {
+    let occupied = count_occupied_adjacent(r, c, grid);
 
-    let cell = cells[r][c];
+    let cell = grid.cells[r][c];
 
     // If a seat is empty, and there are no occupied seats adjacent, it becomes occupied.
     // If a seat is occupied and four or more seats are occupied, it becomes empty.
@@ -147,11 +142,13 @@ fn mutate(cells: &Vec<Vec<Cell>>, r: usize, c: usize, height: usize, width: usiz
     }
 }
 
-fn count_occupied_adjacent(cells: &Vec<Vec<Cell>>, adjacent: Vec<(usize, usize)>) -> usize {
+fn count_occupied_adjacent(r: usize, c: usize, grid: &Grid) -> usize {
+    let adjacent = get_adjacent(r, c, grid.height, grid.width);
+
     let mut result = 0;
 
     for (r, c) in adjacent {
-        if cells[r][c] == Cell::Occupied {
+        if grid.cells[r][c] == Cell::Occupied {
             result += 1;
         }
     }
