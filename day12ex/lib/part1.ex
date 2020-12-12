@@ -1,4 +1,10 @@
 defmodule Part1 do
+  defmodule Ship do
+    defstruct x: 0, y: 0, facing: "E"
+  end
+
+  def new(), do: %Ship{}
+
   def execute({"N", n}, ship = %Ship{y: y}), do: %Ship{ship | y: y + n}
   def execute({"E", n}, ship = %Ship{x: x}), do: %Ship{ship | x: x + n}
   def execute({"S", n}, ship = %Ship{y: y}), do: %Ship{ship | y: y - n}
