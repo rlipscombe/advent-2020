@@ -32,7 +32,18 @@ defmodule Part2 do
       ),
       do: %State{state | ship: %Pos{x: x + n * dx, y: y + n * dy}}
 
-  def execute({"R", 90}, state = %State{waypoint: %Rel{dx: dx, dy: dy}}) do
+  def execute({"L", n}, state), do: rotate_l(n, state)
+  def execute({"R", n}, state), do: rotate_r(n, state)
+
+  def rotate_l(90, state = %State{waypoint: %Rel{dx: dx, dy: dy}}) do
+    %State{state | waypoint: %Rel{dx: -dy, dy: dx}}
+  end
+
+  def rotate_l(n, state), do: rotate_l(n - 90, rotate_l(90, state))
+
+  def rotate_r(90, state = %State{waypoint: %Rel{dx: dx, dy: dy}}) do
     %State{state | waypoint: %Rel{dx: dy, dy: -dx}}
   end
+
+  def rotate_r(n, state), do: rotate_r(n - 90, rotate_r(90, state))
 end
