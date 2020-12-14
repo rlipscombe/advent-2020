@@ -15,6 +15,9 @@ defmodule AddressGenerator do
     # If the bitmask bit is 1: 'and' = 0, 'xor' = 1 => set 1
     # If the bitmask bit is X: 'and' = 0, 'xor' <- {0, 1}
 
+    # Note that the high bits are {0,0}, which gives a zero in the result, which is
+    # what we want.
+
     masks = generate_masks(mask)
     for {and_mask, xor_mask} <- masks do
       address |> Bitwise.band(and_mask) |> Bitwise.bxor(xor_mask)
