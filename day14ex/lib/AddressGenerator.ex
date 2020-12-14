@@ -16,15 +16,8 @@ defmodule AddressGenerator do
     # If the bitmask bit is X: 'and' = 0, 'xor' <- {0, 1}
 
     masks = generate_masks(mask)
-#    masks |> IO.inspect()
-
-#    address |> Integer.to_string(2) |> IO.inspect()
     for {and_mask, xor_mask} <- masks do
-#      and_mask |> Integer.to_string(2) |> IO.inspect()
-#      xor_mask |> Integer.to_string(2) |> IO.inspect()
-      a = address |> Bitwise.band(and_mask) |> Bitwise.bxor(xor_mask)
-      #a |> Integer.to_string(2) |> IO.inspect()
-      a
+      address |> Bitwise.band(and_mask) |> Bitwise.bxor(xor_mask)
     end
   end
 

@@ -61,7 +61,6 @@ defmodule Day14ex do
     value = String.to_integer(value, 10)
 
     addresses = AddressGenerator.generate_addresses(address, state.mask)
-    # addresses |> IO.inspect()
 
     mem = Enum.reduce(addresses, state.mem, fn a, m -> Map.put(m, a, value) end)
     %State2{state | mem: mem}
