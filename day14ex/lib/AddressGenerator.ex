@@ -4,8 +4,15 @@ defmodule AddressGenerator do
     #  AND  XOR   Result
     #   0    0     0
     #   0    1     1
-    #   1    0     same
+    #   1    0     unchanged
     #   1    1     inverse
+    #
+    # Aside: we could use AND/OR masks; the table looks like this:
+    #  AND   OR   Result
+    #   0    0     0
+    #   0    1     1
+    #   1    0     unchanged
+    #   1    1     1
 
     # If the bitmask bit is 0, the corresponding memory address bit is unchanged.
     # If the bitmask bit is 1, the corresponding memory address bit is overwritten with 1.

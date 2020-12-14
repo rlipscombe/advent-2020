@@ -2,8 +2,8 @@ defmodule Day14ex do
   defmodule State1 do
     defstruct(
       # Extra underscore to line up values.
-      mask_and: 0xFFFFFFFFF,
-      mask__or: 0x000000000,
+      and_mask: 0xFFFFFFFFF,
+      xor_mask: 0x000000000,
       mem: %{}
     )
   end
@@ -32,9 +32,11 @@ defmodule Day14ex do
   end
 
   defp step1(_line = "mask = " <> mask, state) do
-    mask_and = mask |> String.replace("X", "1") |> String.to_integer(2)
-    mask__or = mask |> String.replace("X", "0") |> String.to_integer(2)
-    %State1{state | mask_and: mask_and, mask__or: mask__or}
+    # A 0 or 1 overwrites the corresponding bit, while an X leaves it unchanged.
+    # This means that, for an X in the mask, we need AND=1, XOR=0
+    and_mask = mask |> String.replace("X", "1") |> String.to_integer(2)
+    xor_mask = mask |> String.replace("X", "0") |> String.to_integer(2)
+    %State1{state | and_mask: and_mask, xor_mask: xor_mask}
   end
 
   defp step1(line = "mem[" <> _rest, state) do
@@ -45,7 +47,7 @@ defmodule Day14ex do
     address = String.to_integer(address, 10)
     value = String.to_integer(value, 10)
 
-    value = value |> band(state.mask_and) |> bor(state.mask__or)
+    value = value |> band(state.and_mask) |> bxor(state.xor_mask)
 
     %State1{state | mem: Map.put(state.mem, address, value)}
   end
