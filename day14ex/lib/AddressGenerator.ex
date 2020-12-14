@@ -24,9 +24,20 @@ defmodule AddressGenerator do
     end
   end
 
+  # Generate a set of AND/XOR masks corresponding to the bitmask string.
+  # We do this by iterating over the characters in the string, left-shifting
+  # the pair of masks as we see each new character.
+  # For a "0", we want AND=1, XOR=0, leaving the source bit unchanged.
+  # For a "1", we want AND=0, XOR=1, forcing the output bit to be 1.
+  # For "X", we need to generate both options:
+  # - AND=0, XOR=0, forcing the output bit to be 0.
+  # - AND=0, XOR=1, forcing the output bit to be 1.
+  # Because of the "X" rule, we don't generate just one AND/XOR mask; we generate
+  # a list of them.
   def generate_masks(mask), do: generate_masks(mask, [{1, 0}])
 
   defp generate_masks("0" <> rest, acc) do
+    # For each mask pair, add an AND=1, XOR=0 bit.
     next =
       Enum.map(
         acc,
@@ -39,6 +50,7 @@ defmodule AddressGenerator do
   end
 
   defp generate_masks("1" <> rest, acc) do
+    # For each mask pair, add an AND=0, XOR=1 bit.
     next =
       Enum.map(
         acc,
@@ -51,6 +63,7 @@ defmodule AddressGenerator do
   end
 
   defp generate_masks("X" <> rest, acc) do
+    # For each mask pair, add an AND=0, XOR=0 bit, *and* an AND=0, XOR=1 bit.
     next =
       Enum.flat_map(
         acc,
