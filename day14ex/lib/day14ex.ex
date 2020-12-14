@@ -60,55 +60,10 @@ defmodule Day14ex do
     address = String.to_integer(address, 10)
     value = String.to_integer(value, 10)
 
-    # A mask is a pair of values:
-    # - 'and' is the bits I want to manipulate;
-    # - 'or' is the values I want in those bits.
+    addresses = AddressGenerator.generate_addresses(address, state.mask)
+    # addresses |> IO.inspect()
 
-    # If the bitmask bit is 0, the corresponding memory address bit is unchanged.
-    # If the bitmask bit is 1, the corresponding memory address bit is overwritten with 1.
-    # If the bitmask bit is X, the corresponding memory address bit is floating.
-
-    # If the bitmask bit is 0, 'and' = 0, 'or' = 0
-    # If the bitmask bit is 1, 'and' = 1, 'or' = 1
-    # If the bitmask bit is X, 'and' = 1, 'or' = ...
-
-    and_mask = generate_and_mask(state.mask)
-    or_masks = generate_or_masks(state.mask)
-
-    addresses =
-      generate_addresses(address, and_mask, or_masks)
-      |> IO.inspect()
-
-    # mem = Enum.reduce(or_masks, state.mem, fn x -> end)
-
-    state
-    # %State2{state | mem: mem}
-  end
-
-  def generate_and_mask(mask), do: mask |> String.replace("X", "1") |> String.to_integer(2)
-
-  def generate_or_masks(mask), do: generate_or_masks(mask, [0])
-
-  def generate_or_masks("0" <> rest, masks) do
-    next = Enum.flat_map(masks, fn m -> [Bitwise.bsl(m, 1) + 0] end)
-    generate_or_masks(rest, next)
-  end
-
-  def generate_or_masks("1" <> rest, masks) do
-    next = Enum.flat_map(masks, fn m -> [Bitwise.bsl(m, 1) + 1] end)
-    generate_or_masks(rest, next)
-  end
-
-  def generate_or_masks("X" <> rest, masks) do
-    next = Enum.flat_map(masks, fn m -> [Bitwise.bsl(m, 1) + 0, Bitwise.bsl(m, 1) + 1] end)
-    generate_or_masks(rest, next)
-  end
-
-  def generate_or_masks("", masks), do: masks
-
-  def generate_addresses(address, and_mask, or_masks) do
-    for or_mask <- or_masks do
-      address |> Bitwise.band(and_mask) |> Bitwise.bor(or_mask)
-    end
+    mem = Enum.reduce(addresses, state.mem, fn a, m -> Map.put(m, a, value) end)
+    %State2{state | mem: mem}
   end
 end
