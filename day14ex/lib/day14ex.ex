@@ -13,9 +13,10 @@ defmodule Day14ex do
       File.read!(path)
       |> String.split("\n", trim: true)
 
-    final = lines |> Enum.reduce(%State{}, &step/2)
+    part1 = lines |> Enum.reduce(%State{}, &step/2)
+    part1 = Enum.reduce(part1.mem, 0, fn {_addr, value}, acc -> acc + value end)
 
-    IO.puts("#{inspect(final)}")
+    IO.puts("part 1 = #{inspect(part1)}")
   end
 
   defp step(_line = "mask = " <> mask, state) do
