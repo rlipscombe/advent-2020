@@ -44,8 +44,7 @@ defmodule Day15ex do
 
     map =
       Map.update(map, next, [turn], fn
-        [t] -> [turn, t]
-        [t0, _t1] -> [turn, t0]
+        [t | _] -> [turn, t]
       end)
 
     next_turn(turn + 1, turns, next, map)
